@@ -5,8 +5,11 @@
 <p align="center">
   <a href="https://biblia-7s8.pages.dev"><b>Empezar a leer →</b></a> ·
   <a href="#cómo-tenerla-en-tu-teléfono">Tenerla en tu teléfono</a> ·
+  <a href="#apoya-las-versiones-para-iphone-y-android">Apoyar el proyecto</a> ·
   <a href="#english">English</a>
 </p>
+
+> **Esta es la versión web**, gratuita y lista para usarse hoy en cualquier teléfono o computadora. Estamos trabajando en las versiones avanzadas para **iPhone y Android**, que también serán **siempre gratuitas**. [Ver cómo apoyar →](#apoya-las-versiones-para-iphone-y-android)
 
 ---
 
@@ -67,6 +70,19 @@ Es gratis, sin anuncios y sin crear cuenta. No necesitas tienda de apps:
 
 Tu progreso se guarda solo en tu teléfono, y lo que ya abriste funciona sin internet.
 
+## Apoya las versiones para iPhone y Android
+
+Esta versión web es gratuita y lo seguirá siendo. Ya estamos construyendo las **versiones avanzadas para iPhone y Android**, con funciones que solo una app nativa permite:
+
+- Todo el contenido —escenas, arte y mapas— disponible **sin internet** desde el primer día.
+- Mapas en 3D con recorridos por los lugares de cada semana.
+- Recordatorios diarios, widgets y Siri.
+- Explicaciones de palabras y pasajes en el propio teléfono.
+
+**Serán siempre gratuitas, sin anuncios y sin compras dentro de la app.** Para publicarlas necesitamos cubrir los costos de las tiendas (Apple cobra $99 al año y Google $25) y el tiempo de desarrollo, por eso buscamos donaciones.
+
+Si quieres ayudar, o conoces una iglesia o ministerio que quiera ser parte, [escríbenos aquí](https://github.com/moy418/biblia/issues/new?title=Quiero%20apoyar%20el%20proyecto). Compartir la versión web con alguien que la pueda usar también ayuda mucho.
+
 ## Fuentes
 
 | Contenido | Fuente | Licencia |
@@ -105,3 +121,5 @@ The Spanish text is the **1909 Reina-Valera**, a classic public-domain edition r
 Around the untouched text, the app adds what helps you understand it — where each event happened and what country it is today, family trees, a timeline of kings and prophets, the false gods of neighboring peoples, classic paintings and silent-film scenes of each passage. It's made for people who understand better by seeing.
 
 Free, no ads, no account. **[Start reading →](https://biblia-7s8.pages.dev)** — on iPhone: Safari → Share → *Add to Home Screen*.
+
+**This is the web version.** Advanced iPhone and Android apps are in development and will always be free. We're looking for donations to cover app-store fees and development — [get in touch](https://github.com/moy418/biblia/issues/new?title=I%20want%20to%20support%20the%20project).

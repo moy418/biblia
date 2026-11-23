@@ -1,5 +1,5 @@
 // Funciona sin internet: guarda la app y lo que vas leyendo.
-const V = 'biblia-v1';
+const V = 'biblia-v2';
 const SHELL = ['./', 'index.html', 'app.css', 'app.js', 'manifest.webmanifest', 'vendor/leaflet.js', 'vendor/leaflet.css',
   'data/content_es.json', 'data/content_en.json', 'img/icon-192.png', 'img/icon-512.png'];
 self.addEventListener('install', e => e.waitUntil(caches.open(V).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())));
