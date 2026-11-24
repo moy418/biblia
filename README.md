@@ -1,10 +1,10 @@
 <p align="center">
-  <a href="https://biblia-7s8.pages.dev"><img src="docs/banner.png" alt="Lumbrera — a classic Bible, a reading you can see" width="100%"></a>
+  <a href="https://lumbrera.houseofmoy.us"><img src="docs/banner.png" alt="Lumbrera — a classic Bible, a reading you can see" width="100%"></a>
 </p>
 
 <h3 align="center">
-  <a href="https://biblia-7s8.pages.dev/app/">📖 Start reading</a> &nbsp;·&nbsp;
-  <a href="https://biblia-7s8.pages.dev">Meet Lumbrera</a> &nbsp;·&nbsp;
+  <a href="https://lumbrera.houseofmoy.us/app/">📖 Start reading</a> &nbsp;·&nbsp;
+  <a href="https://lumbrera.houseofmoy.us">Meet Lumbrera</a> &nbsp;·&nbsp;
   <a href="#️-support-the-iphone-and-android-apps">❤️ Support</a> &nbsp;·&nbsp;
   <a href="README.es.md">🇲🇽 Español</a>
 </h3>
@@ -122,7 +122,7 @@ No app store, no account, nothing to pay.
 
 | iPhone · iPad | Android | Computer |
 |---|---|---|
-| Open [Lumbrera](https://biblia-7s8.pages.dev/app/) in **Safari** → **Share** → **Add to Home Screen** | Open it in **Chrome** → **⋮** menu → **Install app** | Open it in your browser |
+| Open [Lumbrera](https://lumbrera.houseofmoy.us/app/) in **Safari** → **Share** → **Add to Home Screen** | Open it in **Chrome** → **⋮** menu → **Install app** | Open it in your browser |
 
 Your progress stays on your device, and anything you've opened works offline.
 
@@ -150,7 +150,7 @@ This web version is free and will stay free. We're already building the **advanc
 
 | Content | Source | License |
 |---|---|---|
-| Bible text | King James Version (1769) · Spanish: Reina-Valera (1909) | Public domain |
+| Bible text | King James Version (1769) · Spanish: Reina-Valera (1909) | Public domain (the KJV remains under Crown patent in the UK) |
 | Artworks | Wikimedia Commons | Public domain; photos of sculptures credit their photographer |
 | Films | Internet Archive | Public domain |
 | Maps | Esri World Imagery | With attribution |

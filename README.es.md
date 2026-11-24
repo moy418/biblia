@@ -1,10 +1,10 @@
 <p align="center">
-  <a href="https://biblia-7s8.pages.dev"><img src="docs/banner-es.png" alt="Lumbrera — una Biblia clásica, una lectura que se puede ver" width="100%"></a>
+  <a href="https://lumbrera.houseofmoy.us"><img src="docs/banner-es.png" alt="Lumbrera — una Biblia clásica, una lectura que se puede ver" width="100%"></a>
 </p>
 
 <h3 align="center">
-  <a href="https://biblia-7s8.pages.dev/app/">📖 Empezar a leer</a> &nbsp;·&nbsp;
-  <a href="https://biblia-7s8.pages.dev">Conocer Lumbrera</a> &nbsp;·&nbsp;
+  <a href="https://lumbrera.houseofmoy.us/app/">📖 Empezar a leer</a> &nbsp;·&nbsp;
+  <a href="https://lumbrera.houseofmoy.us">Conocer Lumbrera</a> &nbsp;·&nbsp;
   <a href="#️-apoya-las-apps-para-iphone-y-android">❤️ Apoyar</a> &nbsp;·&nbsp;
   <a href="README.md">🇺🇸 English</a>
 </h3>
@@ -122,7 +122,7 @@ No necesitas tienda de apps, cuenta ni pagar nada.
 
 | iPhone · iPad | Android | Computadora |
 |---|---|---|
-| Abre [Lumbrera](https://biblia-7s8.pages.dev/app/) en **Safari** → **Compartir** → **Agregar a pantalla de inicio** | Ábrela en **Chrome** → menú **⋮** → **Instalar app** | Ábrela en tu navegador |
+| Abre [Lumbrera](https://lumbrera.houseofmoy.us/app/) en **Safari** → **Compartir** → **Agregar a pantalla de inicio** | Ábrela en **Chrome** → menú **⋮** → **Instalar app** | Ábrela en tu navegador |
 
 Tu progreso se guarda solo en tu dispositivo, y lo que ya abriste funciona sin internet.
 
