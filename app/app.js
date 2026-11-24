@@ -559,18 +559,23 @@ window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); window
 // ---------- Buscador ----------
 const fold = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 let SEARCH_Q = '';
-async function loadWholeBible() {
-  const out = [];
-  await Promise.all(C.books.map(async (_, b) => { const k = `${LANG}/${b}`; if (!bibleCache[k]) bibleCache[k] = await json(`data/bible/${LANG}/${b}.json`); }));
-  return C.books.map((_, b) => bibleCache[`${LANG}/${b}`]);
+async function loadWholeBible(lang = LANG) {
+  await Promise.all(C.books.map(async (_, b) => { const k = `${lang}/${b}`; if (!bibleCache[k]) bibleCache[k] = await json(`data/bible/${lang}/${b}.json`); }));
+  return C.books.map((_, b) => bibleCache[`${lang}/${b}`]);
 }
+// El buscador entiende español e inglés a la vez: también mira el contenido del otro idioma.
+const OTHER = {};
+async function otherContent() { const o = LANG === 'es' ? 'en' : 'es'; if (!OTHER[o]) OTHER[o] = await json(`data/content_${o}.json`); return OTHER[o]; }
+const flatTree = ns => ns.flatMap(n => [n, ...flatTree(n.children || [])]);
 // "Juan 3:16", "jn 3", "1 cor 13" → [libro, cap, vers]
 function parseRef(q) {
   const m = fold(q).trim().match(/^((?:[1-3]\s*)?[a-z][a-z ]*?)\.?\s*(\d+)(?:\s*[:.,]\s*(\d+))?$/);
   if (!m) return null;
   const name = m[1].replace(/\s+/g, ' ').trim();
-  const b = C.books.findIndex(x => fold(x.name) === name) >= 0 ? C.books.findIndex(x => fold(x.name) === name)
-          : C.books.findIndex(x => fold(x.name).startsWith(name) && name.length >= 2);
+  const lists = [C.books, ...(Object.values(OTHER).map(o => o.books))];
+  let b = -1;
+  for (const bs of lists) { b = bs.findIndex(x => fold(x.name) === name); if (b >= 0) break; }
+  if (b < 0 && name.length >= 2) for (const bs of lists) { b = bs.findIndex(x => fold(x.name).startsWith(name)); if (b >= 0) break; }
   if (b < 0) return null;
   const c = +m[2]; if (c < 1 || c > C.books[b].chapters) return null;
   return [b, c, m[3] ? +m[3] : 0];
@@ -581,7 +586,7 @@ function hl(text, q) {
 }
 function viewBuscar(el) {
   setTitle(L('Buscar', 'Search'), true);
-  el.innerHTML = h`<input class="search" id="sq" type="search" enterkeyhint="search" autocomplete="off" placeholder="${L('Palabra, persona, lugar o cita (Juan 3:16)…', 'Word, person, place or reference (John 3:16)…')}" value="${esc(SEARCH_Q)}">
+  el.innerHTML = h`<input class="search" id="sq" type="search" enterkeyhint="search" autocomplete="off" placeholder="${L('Español o inglés: palabra, persona o cita…', 'English or Spanish: word, person or reference…')}" value="${esc(SEARCH_Q)}">
     <div class="chips" id="sfilters" style="margin:-4px 0 14px"></div><div id="sr"></div>`;
   const inp = $('#sq', el); let timer = 0, filter = 'all';
   const kinds = [['all', L('Todo', 'All')], ['bible', L('Biblia', 'Bible')], ['people', L('Personas', 'People')], ['places', L('Lugares', 'Places')], ['gods', L('dioses falsos', 'false gods')], ['writings', L('Escritos', 'Writings')], ['media', L('Arte y cine', 'Art & film')]];
@@ -589,35 +594,44 @@ function viewBuscar(el) {
   drawFilters();
   const run = async () => {
     const raw = inp.value.trim(); SEARCH_Q = raw; const q = fold(raw), out = $('#sr', el);
-    if (q.length < 2) { out.innerHTML = `<div class="empty">${L('Busca en toda la Biblia y en el contenido de Lumbrera: personas, lugares, dioses falsos, escritos antiguos, arte y cine.', 'Search the whole Bible and everything in Lumbrera: people, places, false gods, ancient writings, art and film.')}</div>`; return; }
+    if (q.length < 2) { out.innerHTML = `<div class="empty">${L('Escribe en español o en inglés: busca a la vez en la Reina-Valera 1909 y en la King James, y en todo el contenido de Lumbrera. También acepta citas como Juan 3:16 o John 3:16.', 'Type in English or Spanish: it searches the King James and the Reina-Valera 1909 at the same time, plus everything in Lumbrera. References like John 3:16 or Juan 3:16 work too.')}</div>`; return; }
     const want = k => filter === 'all' || filter === k; let html = '';
+    const O = await otherContent(); if (inp.value.trim() !== raw) return;
+    // ids cuyo texto coincide en cualquiera de los dos idiomas
+    const both = (cur, oth, text) => { const s = new Set(); [...cur, ...oth].forEach(x => { if (fold(text(x)).includes(q)) s.add(x.id); }); return s; };
     const ref = parseRef(raw);
     if (ref) html += `<div class="list"><a href="#/leer/${ref[0]}/${ref[1]}${ref[2] ? '/' + ref[2] : ''}">📖 <span><b>${L('Ir a', 'Go to')} ${esc(bookName(ref[0]))} ${ref[1]}${ref[2] ? ':' + ref[2] : ''}</b></span><span class="chev">›</span></a></div>`;
     const sec = (title, items) => items.length ? `<div class="section-title">${title} · ${items.length}</div><div class="list">${items.slice(0, 30).join('')}</div>` : '';
-    if (want('people')) { const ppl = []; const walk = ns => ns.forEach(n => { if (fold(n.name + ' ' + (n.tag || '') + ' ' + (n.note || '')).includes(q)) ppl.push(n); walk(n.children || []); }); walk(C.tree);
+    if (want('people')) { const hit = both(flatTree(C.tree), flatTree(O.tree), n => n.name + ' ' + (n.tag || '') + ' ' + (n.note || '')); const ppl = flatTree(C.tree).filter(n => hit.has(n.id));
       html += sec(L('Personas', 'People'), ppl.map(n => `<button data-person="${n.id}">👪 <span><b>${hl(n.name, q)}</b><div class="small muted">${esc(n.tag || n.note || '')}</div></span><span class="chev">›</span></button>`)); }
-    if (want('places')) html += sec(L('Lugares', 'Places'), C.places.filter(p => fold(p.name + ' ' + p.today).includes(q)).map(p => `<button data-place="${p.id}">📍 <span><b>${hl(p.name, q)}</b><div class="small muted">${L('Hoy', 'Today')}: ${hl(p.today, q)}</div></span><span class="chev">›</span></button>`));
-    if (want('gods')) html += sec(L('dioses falsos', 'false gods'), C.gods.filter(g => fold(g.name + ' ' + g.people + ' ' + g.region + ' ' + g.what).includes(q)).map(g => `<button data-god="${g.id}">🔥 <span><b>${hl(g.name, q)}</b><div class="small muted">${esc(g.people)}</div></span><span class="chev">›</span></button>`));
+    if (want('places')) { const hit = both(C.places, O.places, p => p.name + ' ' + p.today); html += sec(L('Lugares', 'Places'), C.places.filter(p => hit.has(p.id)).map(p => `<button data-place="${p.id}">📍 <span><b>${hl(p.name, q)}</b><div class="small muted">${L('Hoy', 'Today')}: ${hl(p.today, q)}</div></span><span class="chev">›</span></button>`)); }
+    if (want('gods')) { const hit = both(C.gods, O.gods, g => g.name + ' ' + g.people + ' ' + g.region + ' ' + g.what); html += sec(L('dioses falsos', 'false gods'), C.gods.filter(g => hit.has(g.id)).map(g => `<button data-god="${g.id}">🔥 <span><b>${hl(g.name, q)}</b><div class="small muted">${esc(g.people)}</div></span><span class="chev">›</span></button>`)); }
     if (want('writings')) {
-      html += sec(L('Escritos antiguos', 'Ancient writings'), C.extras.filter(x => fold(x.name + ' ' + x.what + ' ' + x.catName).includes(q)).map(x => `<button data-extra="${x.id}">📜 <span><b>${hl(x.name, q)}</b><div class="small muted">${esc(x.catName)} · ${esc(x.date)}</div></span><span class="chev">›</span></button>`));
-      html += sec(L('Mismo evento en varios libros', 'Same event in several books'), C.parallels.filter(p => fold(p.title + ' ' + p.note).includes(q)).map(p => `<button data-parallel="${p.id}">🔀 <span><b>${hl(p.title, q)}</b><div class="small muted">${p.passages.map(passageLabel).join(' · ')}</div></span><span class="chev">›</span></button>`));
-      html += sec(L('Palabras explicadas', 'Words explained'), C.glossary.filter(g => fold(g.term + ' ' + g.definition).includes(q)).map(g => `<button data-term="${esc(g.term)}">📝 <span><b>${hl(g.term, q)}</b><div class="small muted">${esc(g.definition.slice(0, 90))}…</div></span><span class="chev">›</span></button>`));
+      const hx = both(C.extras, O.extras, x => x.name + ' ' + x.what + ' ' + x.catName), hp = both(C.parallels, O.parallels, p => p.title + ' ' + p.note);
+      html += sec(L('Escritos antiguos', 'Ancient writings'), C.extras.filter(x => hx.has(x.id)).map(x => `<button data-extra="${x.id}">📜 <span><b>${hl(x.name, q)}</b><div class="small muted">${esc(x.catName)} · ${esc(x.date)}</div></span><span class="chev">›</span></button>`));
+      html += sec(L('Mismo evento en varios libros', 'Same event in several books'), C.parallels.filter(p => hp.has(p.id)).map(p => `<button data-parallel="${p.id}">🔀 <span><b>${hl(p.title, q)}</b><div class="small muted">${p.passages.map(passageLabel).join(' · ')}</div></span><span class="chev">›</span></button>`));
+      html += sec(L('Palabras explicadas', 'Words explained'), [...C.glossary, ...O.glossary].filter(g => fold(g.term + ' ' + g.definition).includes(q)).map(g => `<button data-term="${esc(g.term)}">📝 <span><b>${hl(g.term, q)}</b><div class="small muted">${esc(g.definition.slice(0, 90))}…</div></span><span class="chev">›</span></button>`));
     }
     if (want('media')) {
-      html += sec(L('Arte', 'Art'), C.art.filter(x => fold(x.title + ' ' + x.artist + ' ' + x.note).includes(q)).map(x => `<button data-art="${x.id}"><img src="${esc(artImg(x))}" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:8px"><span><b>${hl(x.title, q)}</b><div class="small muted">${esc(x.artist)} · ${esc(x.year)}</div></span><span class="chev">›</span></button>`));
-      const sc = C.films.flatMap(f => f.fragments.map(x => ({ film: f, frag: x }))).filter(s => fold(s.frag.title + ' ' + s.frag.note + ' ' + s.film.title).includes(q));
+      const ha = both(C.art, O.art, x => x.title + ' ' + x.artist + ' ' + x.note);
+      html += sec(L('Arte', 'Art'), C.art.filter(x => ha.has(x.id)).map(x => `<button data-art="${x.id}"><img src="${esc(artImg(x))}" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:8px"><span><b>${hl(x.title, q)}</b><div class="small muted">${esc(x.artist)} · ${esc(x.year)}</div></span><span class="chev">›</span></button>`));
+      const allSc = d => d.films.flatMap(f => f.fragments.map(x => ({ film: f, frag: x, id: x.id })));
+      const hs = both(allSc(C), allSc(O), s => s.frag.title + ' ' + s.frag.note + ' ' + s.film.title);
+      const sc = allSc(C).filter(s => hs.has(s.id));
       html += sec(L('Cine', 'Film'), sc.map(s => `<button data-scene="${s.frag.id}"><img src="${sceneThumb(s.frag.id)}" alt="" style="width:64px;height:48px;object-fit:cover;border-radius:8px"><span><b>${hl(s.frag.title, q)}</b><div class="small muted">${esc(s.film.title)} (${s.film.year})</div></span><span class="chev">›</span></button>`));
     }
     out.innerHTML = html + (want('bible') ? `<div id="sbible"><p class="muted small">${L('Buscando en la Biblia…', 'Searching the Bible…')}</p></div>` : '');
     bindCommon(out);
     out.querySelectorAll('[data-person]').forEach(b => b.onclick = () => { const n = findNode(b.dataset.person); const par = (function f(ns, p) { for (const x of ns) { if (x.id === n.id) return p; const r = f(x.children || [], x); if (r) return r; } return null; })(C.tree, null); showTreeNode(n, par); });
-    out.querySelectorAll('[data-term]').forEach(b => b.onclick = () => { const g = C.glossary.find(x => x.term === b.dataset.term); openSheet(`<h2>${esc(g.term)}</h2><p>${esc(g.definition)}</p>`); });
+    out.querySelectorAll('[data-term]').forEach(b => b.onclick = () => { const g = [...C.glossary, ...O.glossary].find(x => x.term === b.dataset.term); openSheet(`<h2>${esc(g.term)}</h2><p>${esc(g.definition)}</p>`); });
     if (!want('bible')) return;
-    const bible = await loadWholeBible(); if (inp.value.trim() !== raw) return;
+    const oth = LANG === 'es' ? 'en' : 'es';
+    const [bCur, bOth] = await Promise.all([loadWholeBible(LANG), loadWholeBible(oth)]); if (inp.value.trim() !== raw) return;
     const hits = []; let total = 0;
-    bible.forEach((book, b) => book.forEach((ch, c) => ch.forEach((v, i) => { if (fold(v).includes(q)) { total++; if (hits.length < 200) hits.push([b, c + 1, i + 1, v]); } })));
+    for (const [bible, lg] of [[bCur, LANG], [bOth, oth]]) { let n = 0;
+      bible.forEach((book, b) => book.forEach((ch, c) => ch.forEach((v, i) => { if (fold(v).includes(q)) { total++; if (n++ < 150) hits.push([b, c + 1, i + 1, v, lg]); } }))); }
     const box = $('#sbible', el); if (!box) return;
-    box.innerHTML = total ? `<div class="section-title">${L('En la Biblia', 'In the Bible')} · ${total}${total > hits.length ? ` (${L('primeros', 'first')} ${hits.length})` : ''}</div><div class="list">${hits.map(([b, c, v, t]) => `<a href="#/leer/${b}/${c}/${v}"><span><b>${esc(bookName(b))} ${c}:${v}</b><div class="small" style="font-family:var(--serif);font-size:16px">${hl(t, q)}</div></span></a>`).join('')}</div>`
+    box.innerHTML = total ? `<div class="section-title">${L('En la Biblia', 'In the Bible')} · ${total}${total > hits.length ? ` (${L('primeros', 'first')} ${hits.length})` : ''}</div><div class="list">${hits.map(([b, c, v, t, lg]) => `<a href="#/leer/${b}/${c}/${v}"><span><b>${esc(bookName(b))} ${c}:${v}</b> <span class="chip" style="padding:1px 7px;font-size:11px">${lg === 'es' ? 'RV1909' : 'KJV'}</span><div class="small" style="font-family:var(--serif);font-size:16px">${hl(t, q)}</div></span></a>`).join('')}</div>`
       : `<div class="section-title">${L('En la Biblia', 'In the Bible')}</div><p class="muted">${L('Sin resultados en el texto bíblico.', 'No results in the Bible text.')}</p>`;
   };
   inp.oninput = () => { clearTimeout(timer); timer = setTimeout(run, 250); };
