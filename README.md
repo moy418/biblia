@@ -66,6 +66,9 @@ The English of 1769 and the Spanish of 1909 have words we no longer use — *the
 ### 🔀 Same event, several books
 When an event is told more than once — the fall of Jerusalem, the Last Supper, Paul's conversion — it tells you where else it appears so you can compare.
 
+### 🔎 Search everything
+Every verse, person, place, false god, painting and film scene in one search box — or type *John 3:16* to jump straight there.
+
 ### 📜 Other writings of the time
 Enoch, the Dead Sea Scrolls, Josephus, Gilgamesh and 36 more: what they are, how they relate to your reading, and why they are not part of the Bible.
 

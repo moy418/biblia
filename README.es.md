@@ -66,6 +66,9 @@ El español de 1909 y el inglés de 1769 tienen palabras que ya no usamos. Tóca
 ### 🔀 Mismo evento, varios libros
 Cuando un hecho se cuenta más de una vez —la caída de Jerusalén, la última cena, la conversión de Pablo— te avisa dónde más aparece para comparar.
 
+### 🔎 Busca todo
+Cada versículo, persona, lugar, dios falso, obra de arte y escena de cine en un solo buscador, o escribe *Juan 3:16* para ir directo.
+
 ### 📜 Otros escritos de la época
 Enoc, los Rollos del Mar Muerto, Josefo, Gilgamesh y 36 más: qué son, cómo se relacionan con tu lectura y por qué no forman parte de la Biblia.
 

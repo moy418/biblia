@@ -144,3 +144,6 @@ video{width:100%;border-radius:14px;background:#000;aspect-ratio:4/3}
 .search{width:100%;padding:12px 14px;border-radius:12px;border:0;background:var(--card2);color:var(--text);font:inherit;margin-bottom:14px}
 .stat{font-size:28px;font-weight:800}
 .toast{position:fixed;left:50%;bottom:calc(var(--tabh) + env(safe-area-inset-bottom) + 16px);transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:600;z-index:70;font-size:14px}
+
+mark{background:rgba(244,196,106,.55);color:inherit;border-radius:3px;padding:0 1px}
+.reader .v.focus{background:rgba(244,196,106,.5);transition:background 1s}

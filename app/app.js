@@ -352,7 +352,9 @@ async function viewReader(el, parts) {
     const was = isDayDone(w.id, day); markDay(w.id, day, !was);
     if (!was) { toast(L('¡Día completado!', 'Day completed!')); if (day < 6) location.hash = `#/leer/w/${w.id}/${day + 1}`; else location.hash = '#/hoy'; } else render();
   };
-  window.scrollTo(0, 0);
+  const fv = parts[0] !== 'w' && parts[2] ? el.querySelector(`[data-v="${+parts[0]}-${+parts[1]}-${+parts[2]}"]`) : null;
+  if (fv) { fv.classList.add('focus'); requestAnimationFrame(() => fv.scrollIntoView({ block: 'center' })); setTimeout(() => fv.classList.remove('focus'), 2600); }
+  else window.scrollTo(0, 0);
 }
 function verseActions(s) {
   const [b, c, v] = s.dataset.v.split('-').map(Number), text = s.textContent.replace(/^\d+/, '').trim(), ref = `${bookName(b)} ${c}:${v}`;
@@ -551,7 +553,76 @@ function viewProgreso(el) {
 }
 async function switchLang() { LANG = LANG === 'es' ? 'en' : 'es'; store.set('lang', LANG); await loadContent(); render(); }
 $('#langBtn').onclick = switchLang;
+$('#searchBtn').onclick = () => { location.hash = '#/buscar'; };
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); window.__installPrompt = e; });
+
+// ---------- Buscador ----------
+const fold = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+let SEARCH_Q = '';
+async function loadWholeBible() {
+  const out = [];
+  await Promise.all(C.books.map(async (_, b) => { const k = `${LANG}/${b}`; if (!bibleCache[k]) bibleCache[k] = await json(`data/bible/${LANG}/${b}.json`); }));
+  return C.books.map((_, b) => bibleCache[`${LANG}/${b}`]);
+}
+// "Juan 3:16", "jn 3", "1 cor 13" → [libro, cap, vers]
+function parseRef(q) {
+  const m = fold(q).trim().match(/^((?:[1-3]\s*)?[a-z][a-z ]*?)\.?\s*(\d+)(?:\s*[:.,]\s*(\d+))?$/);
+  if (!m) return null;
+  const name = m[1].replace(/\s+/g, ' ').trim();
+  const b = C.books.findIndex(x => fold(x.name) === name) >= 0 ? C.books.findIndex(x => fold(x.name) === name)
+          : C.books.findIndex(x => fold(x.name).startsWith(name) && name.length >= 2);
+  if (b < 0) return null;
+  const c = +m[2]; if (c < 1 || c > C.books[b].chapters) return null;
+  return [b, c, m[3] ? +m[3] : 0];
+}
+function hl(text, q) {
+  const f = fold(text), i = f.indexOf(q); if (i < 0) return esc(text);
+  return esc(text.slice(0, i)) + '<mark>' + esc(text.slice(i, i + q.length)) + '</mark>' + esc(text.slice(i + q.length));
+}
+function viewBuscar(el) {
+  setTitle(L('Buscar', 'Search'), true);
+  el.innerHTML = h`<input class="search" id="sq" type="search" enterkeyhint="search" autocomplete="off" placeholder="${L('Palabra, persona, lugar o cita (Juan 3:16)…', 'Word, person, place or reference (John 3:16)…')}" value="${esc(SEARCH_Q)}">
+    <div class="chips" id="sfilters" style="margin:-4px 0 14px"></div><div id="sr"></div>`;
+  const inp = $('#sq', el); let timer = 0, filter = 'all';
+  const kinds = [['all', L('Todo', 'All')], ['bible', L('Biblia', 'Bible')], ['people', L('Personas', 'People')], ['places', L('Lugares', 'Places')], ['gods', L('dioses falsos', 'false gods')], ['writings', L('Escritos', 'Writings')], ['media', L('Arte y cine', 'Art & film')]];
+  const drawFilters = () => { $('#sfilters', el).innerHTML = kinds.map(([k, t]) => `<button class="chip" data-f="${k}" style="${k === filter ? 'background:var(--accent);color:#fff' : ''}">${t}</button>`).join(''); el.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { filter = b.dataset.f; drawFilters(); run(); }); };
+  drawFilters();
+  const run = async () => {
+    const raw = inp.value.trim(); SEARCH_Q = raw; const q = fold(raw), out = $('#sr', el);
+    if (q.length < 2) { out.innerHTML = `<div class="empty">${L('Busca en toda la Biblia y en el contenido de Lumbrera: personas, lugares, dioses falsos, escritos antiguos, arte y cine.', 'Search the whole Bible and everything in Lumbrera: people, places, false gods, ancient writings, art and film.')}</div>`; return; }
+    const want = k => filter === 'all' || filter === k; let html = '';
+    const ref = parseRef(raw);
+    if (ref) html += `<div class="list"><a href="#/leer/${ref[0]}/${ref[1]}${ref[2] ? '/' + ref[2] : ''}">📖 <span><b>${L('Ir a', 'Go to')} ${esc(bookName(ref[0]))} ${ref[1]}${ref[2] ? ':' + ref[2] : ''}</b></span><span class="chev">›</span></a></div>`;
+    const sec = (title, items) => items.length ? `<div class="section-title">${title} · ${items.length}</div><div class="list">${items.slice(0, 30).join('')}</div>` : '';
+    if (want('people')) { const ppl = []; const walk = ns => ns.forEach(n => { if (fold(n.name + ' ' + (n.tag || '') + ' ' + (n.note || '')).includes(q)) ppl.push(n); walk(n.children || []); }); walk(C.tree);
+      html += sec(L('Personas', 'People'), ppl.map(n => `<button data-person="${n.id}">👪 <span><b>${hl(n.name, q)}</b><div class="small muted">${esc(n.tag || n.note || '')}</div></span><span class="chev">›</span></button>`)); }
+    if (want('places')) html += sec(L('Lugares', 'Places'), C.places.filter(p => fold(p.name + ' ' + p.today).includes(q)).map(p => `<button data-place="${p.id}">📍 <span><b>${hl(p.name, q)}</b><div class="small muted">${L('Hoy', 'Today')}: ${hl(p.today, q)}</div></span><span class="chev">›</span></button>`));
+    if (want('gods')) html += sec(L('dioses falsos', 'false gods'), C.gods.filter(g => fold(g.name + ' ' + g.people + ' ' + g.region + ' ' + g.what).includes(q)).map(g => `<button data-god="${g.id}">🔥 <span><b>${hl(g.name, q)}</b><div class="small muted">${esc(g.people)}</div></span><span class="chev">›</span></button>`));
+    if (want('writings')) {
+      html += sec(L('Escritos antiguos', 'Ancient writings'), C.extras.filter(x => fold(x.name + ' ' + x.what + ' ' + x.catName).includes(q)).map(x => `<button data-extra="${x.id}">📜 <span><b>${hl(x.name, q)}</b><div class="small muted">${esc(x.catName)} · ${esc(x.date)}</div></span><span class="chev">›</span></button>`));
+      html += sec(L('Mismo evento en varios libros', 'Same event in several books'), C.parallels.filter(p => fold(p.title + ' ' + p.note).includes(q)).map(p => `<button data-parallel="${p.id}">🔀 <span><b>${hl(p.title, q)}</b><div class="small muted">${p.passages.map(passageLabel).join(' · ')}</div></span><span class="chev">›</span></button>`));
+      html += sec(L('Palabras explicadas', 'Words explained'), C.glossary.filter(g => fold(g.term + ' ' + g.definition).includes(q)).map(g => `<button data-term="${esc(g.term)}">📝 <span><b>${hl(g.term, q)}</b><div class="small muted">${esc(g.definition.slice(0, 90))}…</div></span><span class="chev">›</span></button>`));
+    }
+    if (want('media')) {
+      html += sec(L('Arte', 'Art'), C.art.filter(x => fold(x.title + ' ' + x.artist + ' ' + x.note).includes(q)).map(x => `<button data-art="${x.id}"><img src="${esc(artImg(x))}" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:8px"><span><b>${hl(x.title, q)}</b><div class="small muted">${esc(x.artist)} · ${esc(x.year)}</div></span><span class="chev">›</span></button>`));
+      const sc = C.films.flatMap(f => f.fragments.map(x => ({ film: f, frag: x }))).filter(s => fold(s.frag.title + ' ' + s.frag.note + ' ' + s.film.title).includes(q));
+      html += sec(L('Cine', 'Film'), sc.map(s => `<button data-scene="${s.frag.id}"><img src="${sceneThumb(s.frag.id)}" alt="" style="width:64px;height:48px;object-fit:cover;border-radius:8px"><span><b>${hl(s.frag.title, q)}</b><div class="small muted">${esc(s.film.title)} (${s.film.year})</div></span><span class="chev">›</span></button>`));
+    }
+    out.innerHTML = html + (want('bible') ? `<div id="sbible"><p class="muted small">${L('Buscando en la Biblia…', 'Searching the Bible…')}</p></div>` : '');
+    bindCommon(out);
+    out.querySelectorAll('[data-person]').forEach(b => b.onclick = () => { const n = findNode(b.dataset.person); const par = (function f(ns, p) { for (const x of ns) { if (x.id === n.id) return p; const r = f(x.children || [], x); if (r) return r; } return null; })(C.tree, null); showTreeNode(n, par); });
+    out.querySelectorAll('[data-term]').forEach(b => b.onclick = () => { const g = C.glossary.find(x => x.term === b.dataset.term); openSheet(`<h2>${esc(g.term)}</h2><p>${esc(g.definition)}</p>`); });
+    if (!want('bible')) return;
+    const bible = await loadWholeBible(); if (inp.value.trim() !== raw) return;
+    const hits = []; let total = 0;
+    bible.forEach((book, b) => book.forEach((ch, c) => ch.forEach((v, i) => { if (fold(v).includes(q)) { total++; if (hits.length < 200) hits.push([b, c + 1, i + 1, v]); } })));
+    const box = $('#sbible', el); if (!box) return;
+    box.innerHTML = total ? `<div class="section-title">${L('En la Biblia', 'In the Bible')} · ${total}${total > hits.length ? ` (${L('primeros', 'first')} ${hits.length})` : ''}</div><div class="list">${hits.map(([b, c, v, t]) => `<a href="#/leer/${b}/${c}/${v}"><span><b>${esc(bookName(b))} ${c}:${v}</b><div class="small" style="font-family:var(--serif);font-size:16px">${hl(t, q)}</div></span></a>`).join('')}</div>`
+      : `<div class="section-title">${L('En la Biblia', 'In the Bible')}</div><p class="muted">${L('Sin resultados en el texto bíblico.', 'No results in the Bible text.')}</p>`;
+  };
+  inp.oninput = () => { clearTimeout(timer); timer = setTimeout(run, 250); };
+  run(); setTimeout(() => inp.focus(), 50);
+}
 
 // ---------- Router ----------
 $('#back').onclick = () => history.length > 1 ? history.back() : (location.hash = '#/hoy');
@@ -565,6 +636,7 @@ async function render() {
   try {
     if (route === 'leer') await viewReader(el, parts);
     else if (route === 'atlas') viewAtlas(el);
+    else if (route === 'buscar') viewBuscar(el);
     else if (route === 'historia') viewHistoria(el, parts);
     else if (route === 'fuentes') viewFuentes(el, parts);
     else if (route === 'progreso') viewProgreso(el);
