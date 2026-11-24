@@ -1,4 +1,4 @@
-/* Biblia — versión web. Sin dependencias salvo Leaflet para el mapa. */
+/* Lumbrera — versión web. Sin dependencias salvo Leaflet para el mapa. */
 'use strict';
 
 // ---------- Estado ----------
@@ -107,7 +107,7 @@ function renderTabs(active) {
   const tabs = [['hoy', L('Hoy', 'Today')], ['atlas', 'Atlas'], ['historia', L('Historia', 'History')], ['fuentes', L('Fuentes', 'Sources')], ['progreso', L('Progreso', 'Progress')]];
   $('#tabs').innerHTML = tabs.map(([k, t]) => `<a href="#/${k}" class="${k === active ? 'on' : ''}" aria-current="${k === active ? 'page' : 'false'}">${ICONS[k]}<span>${t}</span></a>`).join('');
 }
-function setTitle(t, back) { $('#title').textContent = t; $('#back').hidden = !back; document.title = t === 'Biblia' ? L('Biblia — lectura cronológica', 'Bible — chronological reading') : `${t} · Biblia`; }
+function setTitle(t, back) { $('#title').textContent = t; $('#back').hidden = !back; document.title = t === 'Lumbrera' ? L('Lumbrera — Biblia Reina-Valera 1909', 'Lumbrera — chronological Bible') : `${t} · Lumbrera`; }
 function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 1800); }
 
 // Hoja inferior
@@ -257,7 +257,7 @@ function showTreeNode(n, parent) {
 
 // ---------- Hoy ----------
 async function viewHoy(el) {
-  setTitle('Biblia', false);
+  setTitle('Lumbrera', false);
   const w = week(P.week), ei = eraIndex(w), days = weekDays(w), nd = nextDay(w.id), doneCount = days.filter((_, i) => isDayDone(w.id, i)).length;
   const places = w.places.map(id => byId(C.places, id)).filter(Boolean);
   const gods = w.godKeys.map(id => byId(C.gods, id)).filter(Boolean);
@@ -534,7 +534,7 @@ function viewProgreso(el) {
       <div class="progress" style="margin-top:14px"><div style="width:${days / 364 * 100}%"></div></div><p class="small muted" style="margin-top:6px">${Math.round(days / 364 * 100)}% ${L('del plan', 'of the plan')}</p></div>
     <div class="section-title">${L('Plan de 52 semanas', '52-week plan')}</div>
     <div class="list">${C.weeks.map(w => `<a href="#/hoy" data-week="${w.id}"><b style="min-width:28px;color:${P.done.includes(w.id) ? 'var(--good)' : w.id === P.week ? 'var(--accent)' : 'inherit'}">${P.done.includes(w.id) ? '✓' : w.id}</b><span><div>${esc(w.reading)}</div><div class="small muted">${esc(w.era)} · ${yearLabel(w.year)}</div></span><span class="chev">›</span></a>`).join('')}</div>
-    <div class="card" style="background:var(--accent-soft)"><h3>📱 ${L('iPhone y Android en camino', 'iPhone and Android on the way')}</h3><p class="small">${L('Esta es la versión web. Estamos trabajando en las versiones avanzadas para iPhone y Android —con todo sin internet, mapas 3D y recordatorios— que también serán siempre gratuitas. Buscamos donaciones para cubrir los costos de las tiendas y el desarrollo.', 'This is the web version. We are building advanced iPhone and Android apps —fully offline, with 3D maps and reminders— that will also always be free. We are looking for donations to cover app-store fees and development.')}</p><a class="btn block" target="_blank" rel="noopener" href="https://github.com/moy418/biblia#apoya-las-versiones-para-iphone-y-android">${L('Quiero apoyar', 'I want to help')}</a></div>
+    <div class="card" style="background:var(--accent-soft)"><h3>📱 ${L('iPhone y Android en camino', 'iPhone and Android on the way')}</h3><p class="small">${L('Esta es la versión web. Estamos trabajando en las versiones avanzadas para iPhone y Android —con todo sin internet, mapas 3D y recordatorios— que también serán siempre gratuitas. Buscamos donaciones para cubrir los costos de las tiendas y el desarrollo.', 'This is the web version. We are building advanced iPhone and Android apps —fully offline, with 3D maps and reminders— that will also always be free. We are looking for donations to cover app-store fees and development.')}</p><a class="btn block" target="_blank" rel="noopener" href="../#apoyar">${L('Quiero apoyar', 'I want to help')}</a></div>
     <div class="section-title">${L('Ajustes', 'Settings')}</div>
     <div class="list"><button id="swLang">🌐 ${L('Idioma: Español', 'Language: English')}<span class="chev">${L('Cambiar', 'Change')}</span></button><button id="install">📲 ${L('Instalar en la pantalla de inicio', 'Install on the home screen')}<span class="chev">›</span></button><button id="reset" style="color:var(--bad)">${L('Reiniciar progreso', 'Reset progress')}</button></div>
     <div class="card small muted"><p>${L('Texto bíblico', 'Bible text')}: ${esc(C.bibleName)} (${L('dominio público', 'public domain')}). ${L('Mapas: Esri. Fotos y artículos: Wikipedia y Wikimedia Commons. Películas: Internet Archive (dominio público).', 'Maps: Esri. Photos and articles: Wikipedia and Wikimedia Commons. Films: Internet Archive (public domain).')}</p><p style="margin:0">${L('Tu progreso se guarda solo en este dispositivo.', 'Your progress is saved only on this device.')}</p></div>`;
@@ -543,7 +543,7 @@ function viewProgreso(el) {
   $('#reset').onclick = () => { if (confirm(L('¿Borrar todo tu progreso?', 'Erase all your progress?'))) { P.days = {}; P.done = []; P.dates = []; P.week = 1; save(); render(); } };
   $('#install').onclick = () => {
     if (window.__installPrompt) { window.__installPrompt.prompt(); return; }
-    openSheet(`<h2>${L('Instalar Biblia', 'Install Biblia')}</h2><div class="card"><p><b>iPhone / iPad (Safari)</b></p><p>1. ${L('Toca el botón Compartir', 'Tap the Share button')} <span style="font-size:20px">⬆︎</span><br>2. ${L('Elige «Agregar a pantalla de inicio»', 'Choose “Add to Home Screen”')}<br>3. ${L('Toca «Agregar»', 'Tap “Add”')}</p></div><div class="card"><p><b>Android (Chrome)</b></p><p>${L('Menú ⋮ → «Instalar app» o «Agregar a pantalla principal».', 'Menu ⋮ → “Install app” or “Add to Home screen”.')}</p></div>`);
+    openSheet(`<h2>${L('Instalar Lumbrera', 'Install Lumbrera')}</h2><div class="card"><p><b>iPhone / iPad (Safari)</b></p><p>1. ${L('Toca el botón Compartir', 'Tap the Share button')} <span style="font-size:20px">⬆︎</span><br>2. ${L('Elige «Agregar a pantalla de inicio»', 'Choose “Add to Home Screen”')}<br>3. ${L('Toca «Agregar»', 'Tap “Add”')}</p></div><div class="card"><p><b>Android (Chrome)</b></p><p>${L('Menú ⋮ → «Instalar app» o «Agregar a pantalla principal».', 'Menu ⋮ → “Install app” or “Add to Home screen”.')}</p></div>`);
   };
 }
 async function switchLang() { LANG = LANG === 'es' ? 'en' : 'es'; store.set('lang', LANG); await loadContent(); render(); }

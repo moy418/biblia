@@ -2,30 +2,338 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Biblia — lectura cronológica</title>
-<meta name="description" content="Lee la Biblia en 52 semanas en orden cronológico, con mapas, familias, línea del tiempo, dioses falsos, arte y cine.">
-<meta name="theme-color" content="#1f3a8a" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Biblia">
-<link rel="apple-touch-icon" href="img/icon-180.png">
-<link rel="icon" href="img/icon-192.png">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="app.css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lumbrera — la Biblia Reina-Valera 1909, con una lectura que se puede ver</title>
+<meta name="description" content="Lumbrera es la Biblia Reina-Valera 1909 íntegra, en 52 semanas y en orden cronológico, con mapas, familias, línea del tiempo, arte y cine junto al texto. Gratis.">
+<meta property="og:title" content="Lumbrera — una Biblia que se puede ver">
+<meta property="og:description" content="La Reina-Valera 1909 íntegra, con mapas, familias, línea del tiempo, arte y cine junto al texto. Gratis, sin anuncios.">
+<meta property="og:image" content="docs/banner.png">
+<meta name="theme-color" content="#14286b">
+<link rel="icon" href="app/img/icon-192.png">
+<link rel="apple-touch-icon" href="app/img/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/*
+VOICE: reverente, cálido y claro; habla a quien lee la Biblia y aprende viendo.
+IDEA: una lámpara sobre el texto — la página clásica al centro y la luz que revela lo que la rodea.
+PICTURE: el teléfono abierto en la lectura, con mapa, árbol, arte y cine alrededor como si la luz los descubriera.
+COLOUR and TYPE: azul lapislázuli profundo y blanco; un solo acento cálido de luz de lámpara. Literata para títulos y versículos, Inter para lo demás.
+LAYOUT: portada a todo ancho; luego "la idea"; filas alternas de función + captura; las eras en una franja; instalar; apoyar.
+*/
+:root{--lapis:#14286b;--lapis2:#1f3a8a;--ink:#101525;--paper:#ffffff;--soft:#f3f5fb;--muted:#5a6072;--lamp:#f4c46a;--line:rgba(20,40,107,.12)}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth;scroll-padding-top:70px;overflow-x:clip}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.6 Inter,system-ui,-apple-system,Segoe UI,sans-serif;overflow-x:clip}
+a{color:inherit}
+img{max-width:100%;display:block}
+h1,h2,h3{font-family:Literata,Georgia,serif;line-height:1.08;margin:0;text-wrap:balance}
+h2{font-size:clamp(30px,4.2vw,46px)}
+h3{font-size:24px}
+p{margin:0 0 14px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 max(5vw,18px)}
+.btn{display:inline-flex;align-items:center;gap:10px;min-height:52px;padding:0 26px;border-radius:999px;font-weight:700;text-decoration:none;font-size:17px;transition:transform .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn.primary{background:var(--lamp);color:#1b1404}
+.btn.ghost{border:1.5px solid rgba(255,255,255,.45);color:#fff}
+.btn.dark{background:var(--lapis);color:#fff}
+.btn:focus-visible,a:focus-visible,button:focus-visible{outline:3px solid var(--lamp);outline-offset:3px}
+/* Barra */
+nav.top{position:sticky;top:0;z-index:10;background:rgba(20,40,107,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:#fff}
+nav.top .wrap{display:flex;align-items:center;gap:18px;height:62px}
+nav.top .brand{display:flex;align-items:center;gap:10px;font-family:Literata,serif;font-weight:700;font-size:21px;text-decoration:none}
+nav.top .brand img{width:32px;height:32px;border-radius:8px}
+nav.top .links{display:flex;gap:22px;margin-left:auto;font-size:15px;font-weight:500}
+nav.top .links a{text-decoration:none;opacity:.85}
+nav.top .links a:hover{opacity:1}
+nav.top button{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:999px;padding:7px 12px;font:600 14px Inter,sans-serif;cursor:pointer;min-height:36px}
+@media(max-width:760px){nav.top .links{display:none}nav.top button{margin-left:auto}}
+/* Portada */
+.hero{position:relative;background:radial-gradient(1000px 600px at 78% 18%,rgba(244,196,106,.38),transparent 60%),linear-gradient(170deg,var(--lapis2),var(--lapis) 55%,#0c1846);color:#fff;overflow:hidden}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:40px;align-items:center;padding-top:clamp(40px,7vw,90px);padding-bottom:clamp(40px,7vw,90px)}
+.edition{display:inline-block;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:6px 14px;font-size:14px;font-weight:600;color:var(--lamp);margin-bottom:22px}
+.hero h1{font-size:clamp(56px,9vw,104px);letter-spacing:-.01em}
+.hero .lead{font-family:Literata,serif;font-size:clamp(24px,3vw,34px);line-height:1.2;margin:14px 0 18px}
+.hero .lead em{font-style:normal;color:var(--lamp)}
+.hero .sub{font-size:18px;opacity:.88;max-width:34em}
+.hero .ctas{display:flex;gap:14px;flex-wrap:wrap;margin:28px 0 22px}
+.verse{font-family:Literata,serif;font-size:17px;opacity:.85;border-left:2px solid var(--lamp);padding-left:14px;max-width:30em}
+.verse small{display:block;font-family:Inter,sans-serif;font-size:13px;opacity:.75;margin-top:4px}
+.stage{position:relative;height:clamp(460px,52vw,620px)}
+.phone{position:absolute;width:clamp(200px,20vw,270px);aspect-ratio:390/844;border-radius:36px;background:#0b0d14;padding:9px;box-shadow:0 30px 60px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.08)}
+.phone img{width:100%;height:100%;object-fit:cover;object-position:top;border-radius:28px}
+.phone.a{left:2%;top:10%;transform:rotate(-6deg)}
+.phone.b{left:32%;top:0;z-index:2}
+.phone.c{right:0;top:12%;transform:rotate(6deg)}
+@media(max-width:860px){.hero .wrap{grid-template-columns:1fr}.stage{height:440px}.phone{width:190px}.phone.a{left:0}.phone.b{left:calc(50% - 95px)}.phone.c{right:0}}
+@media(max-width:480px){.phone{width:150px}.phone.b{left:calc(50% - 75px)}.stage{height:350px}}
+/* Números */
+.stats{background:var(--lapis);color:#fff}
+.stats .wrap{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;padding-top:26px;padding-bottom:26px;text-align:center}
+.stats b{display:block;font-family:Literata,serif;font-size:clamp(28px,3.4vw,40px);color:var(--lamp);line-height:1}
+.stats span{font-size:14px;opacity:.85}
+@media(max-width:760px){.stats .wrap{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:22px}}
+/* Idea */
+.band{padding:clamp(56px,8vw,110px) 0}
+.idea .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(30px,5vw,70px);align-items:center}
+.kicker{font-size:15px;font-weight:700;color:var(--lapis2);margin-bottom:12px}
+.idea p{font-size:19px;color:#2a3145}
+.page{background:#fffdf7;border:1px solid #ece4cf;border-radius:6px;padding:34px 36px;font-family:Literata,serif;font-size:19px;line-height:1.75;box-shadow:0 24px 50px rgba(20,40,107,.14);position:relative}
+.page::before{content:"";position:absolute;inset:-40px 0 auto auto;width:240px;height:240px;background:radial-gradient(circle,rgba(244,196,106,.55),transparent 65%);z-index:-1}
+.page h4{font-family:Inter,sans-serif;font-size:13px;color:var(--muted);margin:0 0 10px;font-weight:600}
+.page sup{font-family:Inter,sans-serif;font-size:12px;color:#8a8a8a;font-weight:700;margin-right:3px}
+.page .gl{text-decoration:underline dotted var(--lapis2);text-underline-offset:4px}
+.note{display:flex;gap:10px;align-items:flex-start;background:var(--soft);border-radius:12px;padding:12px 14px;font-family:Inter,sans-serif;font-size:15px;line-height:1.45;margin-top:16px}
+@media(max-width:860px){.idea .wrap{grid-template-columns:1fr}}
+/* Funciones */
+.feature .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(30px,6vw,90px);align-items:center}
+.feature:nth-of-type(even){background:var(--soft)}
+.feature:nth-of-type(even) .shot{order:-1}
+.feature p{font-size:18px;color:#2a3145;max-width:30em}
+.feature ul{padding-left:20px;margin:0;color:#2a3145}
+.feature li{margin:6px 0}
+.shot{display:flex;justify-content:center}
+.shot .phone{position:relative;transform:none;width:min(300px,70vw)}
+.q{font-family:Literata,serif;font-size:20px;color:var(--lapis2);margin-bottom:10px}
+@media(max-width:860px){.feature .wrap{grid-template-columns:1fr}.feature:nth-of-type(even) .shot{order:0}}
+/* Eras */
+.eras h2{margin-bottom:10px}
+.track{display:flex;height:76px;border-radius:14px;overflow:hidden;margin:28px 0 12px}
+.track div{display:flex;align-items:flex-end;padding:8px;color:#fff;font-size:12px;font-weight:600;line-height:1.2;border-right:1px solid rgba(255,255,255,.25)}
+.legend-eras{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px 18px;font-size:15px;color:var(--muted)}
+.legend-eras i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:8px;vertical-align:-1px}
+@media(max-width:700px){.track div{font-size:0;padding:0}}
+/* Instalar */
+.install .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:28px}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px}
+.card h3{font-size:21px;margin-bottom:10px}
+.card ol{margin:0;padding-left:20px;color:#2a3145}
+@media(max-width:860px){.install .grid{grid-template-columns:1fr}}
+/* Apoyar */
+.support{background:linear-gradient(160deg,var(--lapis2),var(--lapis));color:#fff}
+.support .wrap{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:40px;align-items:center}
+.support p{opacity:.9;font-size:18px}
+.support ul{margin:8px 0 18px;padding-left:20px;opacity:.92}
+.costs{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:18px;padding:24px}
+.costs div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.14)}
+.costs div:last-child{border:0}
+.costs b{white-space:nowrap;color:var(--lamp)}
+@media(max-width:860px){.support .wrap{grid-template-columns:1fr}}
+footer{background:#0c1846;color:rgba(255,255,255,.75);font-size:14px;padding:40px 0}
+footer .wrap{display:flex;flex-wrap:wrap;gap:20px 40px;justify-content:space-between}
+footer a{color:#fff}
+@media(prefers-reduced-motion:no-preference){.phone.b{animation:float 6s ease-in-out infinite}@keyframes float{50%{transform:translateY(-10px)}}}
+</style>
 </head>
 <body>
-<div id="app">
-  <header id="topbar"><button id="back" class="icon-btn" aria-label="Atrás" hidden>‹</button><h1 id="title">Biblia</h1><button id="langBtn" class="pill" aria-label="Idioma">EN</button></header>
-  <main id="view" tabindex="-1"></main>
-  <nav id="tabs" aria-label="Secciones"></nav>
-</div>
-<div id="sheet" class="sheet" hidden><div class="sheet-backdrop"></div><div class="sheet-panel" role="dialog" aria-modal="true"><div class="sheet-grab"></div><button class="sheet-close icon-btn" aria-label="Cerrar">✕</button><div class="sheet-body"></div></div></div>
-<div id="zoom" class="zoom" hidden><img alt=""><button class="zoom-close icon-btn" aria-label="Cerrar">✕</button><div class="zoom-cap"></div></div>
-<script src="vendor/leaflet.js" defer></script>
-<script src="app.js" defer></script>
+
+<nav class="top" aria-label="Principal">
+  <div class="wrap">
+    <a class="brand" href="#inicio"><img src="app/img/icon-192.png" alt="">Lumbrera</a>
+    <div class="links">
+      <a href="#idea" data-en="The idea">La idea</a>
+      <a href="#ver" data-en="Features">Funciones</a>
+      <a href="#instalar" data-en="Install">Instalar</a>
+      <a href="#apoyar" data-en="Support">Apoyar</a>
+      <a href="https://github.com/moy418/biblia">GitHub</a>
+    </div>
+    <button id="lang" aria-label="Change language">EN</button>
+  </div>
+</nav>
+
+<header class="hero" id="inicio">
+  <div class="wrap">
+    <div>
+      <span class="edition" data-en="Reina-Valera 1909 · complete text">Reina-Valera 1909 · texto íntegro</span>
+      <h1>Lumbrera</h1>
+      <p class="lead" data-en-html="A classic Bible.<br><em>A reading you can see.</em>">Una Biblia clásica.<br><em>Una lectura que se puede ver.</em></p>
+      <p class="sub" data-en="The whole Bible in 52 weeks, in the order events happened — with maps, family trees, a timeline, art and film right beside the text. For everyone who understands better by seeing.">La Biblia completa en 52 semanas, en el orden en que ocurrieron los hechos, con mapas, familias, línea del tiempo, arte y cine junto al texto. Para quienes entienden mejor viendo.</p>
+      <div class="ctas">
+        <a class="btn primary" href="app/" data-en="Start reading — free">Empezar a leer gratis</a>
+        <a class="btn ghost" href="#instalar" data-en="Put it on my phone">Ponerla en mi teléfono</a>
+      </div>
+      <p class="verse">Lámpara es á mis pies tu palabra, y lumbrera á mi camino.<small>Salmos 119:105 · Reina-Valera 1909</small></p>
+    </div>
+    <div class="stage" aria-hidden="true">
+      <div class="phone a"><img src="docs/screens/lector.png" alt=""></div>
+      <div class="phone b"><img src="docs/screens/hoy.png" alt=""></div>
+      <div class="phone c"><img src="docs/screens/arbol.png" alt=""></div>
+    </div>
+  </div>
+</header>
+
+<section class="stats" aria-label="En números">
+  <div class="wrap">
+    <div><b>1909</b><span data-en="classic edition">edición clásica</span></div>
+    <div><b>52</b><span data-en="weeks">semanas</span></div>
+    <div><b>73</b><span data-en="places on the map">lugares en el mapa</span></div>
+    <div><b>60</b><span data-en="classic artworks">obras de arte</span></div>
+    <div><b>24</b><span data-en="silent-film scenes">escenas de cine</span></div>
+    <div><b>$0</b><span data-en="always">siempre</span></div>
+  </div>
+</section>
+
+<section class="band idea" id="idea">
+  <div class="wrap">
+    <div>
+      <div class="kicker" data-en="The idea">La idea</div>
+      <h2 data-en="The text, untouched. The understanding, all around it.">El texto, intacto. El entendimiento, alrededor.</h2>
+      <p style="margin-top:20px" data-en="We chose the 1909 Reina-Valera: a classic Spanish edition in the public domain, read exactly as it was published, without later revisions.">Elegimos la <b>Reina-Valera de 1909</b>: una edición clásica en español, de dominio público, que se lee tal como fue publicada, sin las revisiones posteriores.</p>
+      <p data-en="What we add is everything that helps you understand it: where each thing happened, who was who, what was going on in the world, and what it looked like. Many people understand better by seeing than by reading alone. Lumbrera is made for them.">Lo que agregamos es todo lo que ayuda a entenderlo: dónde pasó cada cosa, quién era quién, qué ocurría en el mundo y cómo se veía. Muchas personas entienden mejor viendo que solo leyendo. Lumbrera está hecha para ellas.</p>
+    </div>
+    <div class="page" role="img" aria-label="Ejemplo de lectura de Mateo 9 con una palabra explicada y un aviso de evento paralelo">
+      <h4>Mateo 9 · Reina-Valera 1909</h4>
+      <sup>9</sup>Y pasando Jesús de allí, vió á un hombre que estaba sentado al banco de los públicos tributos, el cual se llamaba Mateo; y dícele: Sígueme. Y se levantó, y le siguió.
+      <div class="note">🎨 <span><b data-en="Art for this chapter">Arte de este capítulo</b><br><span data-en="The Calling of Saint Matthew — Caravaggio, 1600">La vocación de san Mateo — Caravaggio, 1600</span></span></div>
+      <div class="note">🔀 <span><b data-en="Same event">Mismo evento</b><br><span data-en="Also told in Mark 2 and Luke 5">También se cuenta en Marcos 2 y Lucas 5</span></span></div>
+    </div>
+  </div>
+</section>
+
+<div id="ver"></div>
+
+<section class="band feature">
+  <div class="wrap">
+    <div>
+      <div class="q" data-en="Where did it happen?">¿Dónde pasó?</div>
+      <h2 data-en="Every place, on a real map">Cada lugar, en un mapa real</h2>
+      <p style="margin-top:16px" data-en="A satellite map with 73 biblical places and the country where each one is today. Ur is in Iraq, Edom in Jordan, Nineveh near Mosul. Each week shows its region and its route.">Un mapa satelital con 73 lugares bíblicos y el país donde queda cada uno hoy. Ur está en Irak, Edom en Jordania, Nínive junto a Mosul. Cada semana muestra su región y su ruta.</p>
+    </div>
+    <div class="shot"><div class="phone"><img loading="lazy" src="docs/screens/atlas.png" alt="Atlas con lugares bíblicos sobre un mapa satelital"></div></div>
+  </div>
+</section>
+
+<section class="band feature">
+  <div class="wrap">
+    <div>
+      <div class="q" data-en="Who was who?">¿Quién era quién?</div>
+      <h2 data-en="A family tree you can explore">Un árbol genealógico que se recorre</h2>
+      <p style="margin-top:16px" data-en="From Adam to Jesus, with the line of the promise highlighted through Abraham and David. Move it, zoom it, open and close branches, and tap anyone to see who they were and where they appear.">De Adán a Jesús, con la línea de la promesa resaltada por Abraham y David. Muévelo, amplíalo, abre y cierra ramas, y toca a cualquiera para ver quién era y en qué semanas aparece.</p>
+    </div>
+    <div class="shot"><div class="phone"><img loading="lazy" src="docs/screens/arbol.png" alt="Árbol genealógico"></div></div>
+  </div>
+</section>
+
+<section class="band feature">
+  <div class="wrap">
+    <div>
+      <div class="q" data-en="When did it happen?">¿Cuándo pasó?</div>
+      <h2 data-en="Kings, prophets and empires on one timeline">Reyes, profetas e imperios en una línea</h2>
+      <p style="margin-top:16px" data-en="Slide through the centuries and see, year by year, who ruled Israel and Judah, which prophet was speaking, and which empire dominated — and whether each king was faithful or not, according to Kings.">Desliza por los siglos y ve, año por año, quién gobernaba Israel y Judá, qué profeta hablaba y qué imperio dominaba, y si cada rey fue fiel o no, según el libro de Reyes.</p>
+    </div>
+    <div class="shot"><div class="phone"><img loading="lazy" src="docs/screens/tiempo.png" alt="Línea del tiempo"></div></div>
+  </div>
+</section>
+
+<section class="band feature">
+  <div class="wrap">
+    <div>
+      <div class="q" data-en="What did it look like?">¿Cómo se veía?</div>
+      <h2 data-en="60 masterpieces, beside their passage">60 obras maestras, junto a su pasaje</h2>
+      <p style="margin-top:16px" data-en="Leonardo's Last Supper, Michelangelo's Creation of Adam, Caravaggio, Rembrandt, Rubens. Each painting opens full screen with zoom, and takes you to the passage it illustrates.">La última cena de Leonardo, La creación de Adán de Miguel Ángel, Caravaggio, Rembrandt, Rubens. Cada obra se abre en grande, con zoom, y te lleva al pasaje que ilustra.</p>
+    </div>
+    <div class="shot"><div class="phone"><img loading="lazy" src="docs/screens/arte.png" alt="Visor de arte"></div></div>
+  </div>
+</section>
+
+<section class="band feature">
+  <div class="wrap">
+    <div>
+      <div class="q" data-en="And in motion?">¿Y en movimiento?</div>
+      <h2 data-en="Silent-film classics, scene by scene">Clásicos del cine mudo, escena por escena</h2>
+      <p style="margin-top:16px" data-en="Scenes from Cabiria (1914), The Ten Commandments (1923) and The King of Kings (1927), cut to the exact moment of each passage. All public domain, with a note on what the film adds to the text.">Escenas de <i>Cabiria</i> (1914), <i>Los Diez Mandamientos</i> (1923) y <i>El Rey de reyes</i> (1927), recortadas en el momento exacto de cada pasaje. Todas de dominio público, con una nota sobre lo que la película añade al texto.</p>
+    </div>
+    <div class="shot"><div class="phone"><img loading="lazy" src="docs/screens/cine.png" alt="Escena de cine mudo"></div></div>
+  </div>
+</section>
+
+<section class="band feature">
+  <div class="wrap">
+    <div>
+      <div class="q" data-en="Who did they worship?">¿A quién adoraban?</div>
+      <h2 data-en="The false gods of the neighbors">Los dioses falsos de los pueblos vecinos</h2>
+      <p style="margin-top:16px" data-en="baal, moloc, asera, quemós, dagón, marduk and more: what they were, where they were worshiped, what the Bible says about them, and what remains of them today.">baal, moloc, asera, quemós, dagón, marduk y más: qué eran, dónde se adoraban, qué dice la Biblia de ellos y qué queda hoy.</p>
+      <ul>
+        <li data-en="Same event, several books: it tells you where else a story is told so you can compare">Mismo evento, varios libros: te avisa dónde más se cuenta un hecho para comparar</li>
+        <li data-en="Ancient words explained: tap them and see what they mean">Palabras antiguas explicadas: tócalas y ve qué significan</li>
+        <li data-en="40 ancient writings: Enoch, the Dead Sea Scrolls, Josephus and more">40 escritos antiguos: Enoc, los Rollos del Mar Muerto, Josefo y más</li>
+      </ul>
+    </div>
+    <div class="shot"><div class="phone"><img loading="lazy" src="docs/screens/dioses.png" alt="Ficha de un dios falso"></div></div>
+  </div>
+</section>
+
+<section class="band eras" style="background:var(--soft)">
+  <div class="wrap">
+    <div class="kicker" data-en="The plan">El plan</div>
+    <h2 data-en="One year, in the order it happened">Un año, en el orden en que pasó</h2>
+    <p style="margin-top:14px;color:#2a3145;font-size:18px;max-width:40em" data-en="Seven readings a week. Job beside the patriarchs, the prophets beside the kings of their time, Paul's letters inside the story of Acts.">Siete lecturas por semana. Job junto a los patriarcas, los profetas junto a los reyes de su tiempo, las cartas de Pablo dentro de la historia de Hechos.</p>
+    <div class="track" id="track"></div>
+    <div class="legend-eras" id="legend"></div>
+  </div>
+</section>
+
+<section class="band install" id="instalar">
+  <div class="wrap">
+    <div class="kicker" data-en="Install">Instalar</div>
+    <h2 data-en="No app store needed">No necesitas tienda de apps</h2>
+    <div class="grid">
+      <div class="card"><h3>iPhone · iPad</h3><ol><li data-en-html="Open <b>Lumbrera</b> in Safari">Abre <b>Lumbrera</b> en Safari</li><li data-en-html="Tap <b>Share</b>">Toca <b>Compartir</b></li><li data-en-html="Choose <b>Add to Home Screen</b>">Elige <b>Agregar a pantalla de inicio</b></li></ol></div>
+      <div class="card"><h3>Android</h3><ol><li data-en-html="Open <b>Lumbrera</b> in Chrome">Abre <b>Lumbrera</b> en Chrome</li><li data-en-html="Tap the <b>⋮</b> menu">Toca el menú <b>⋮</b></li><li data-en-html="Choose <b>Install app</b>">Elige <b>Instalar app</b></li></ol></div>
+      <div class="card"><h3 data-en="Computer">Computadora</h3><p style="color:#2a3145" data-en="Just open it in your browser. Your progress stays on your device; no account, no ads, no tracking.">Solo ábrela en tu navegador. Tu progreso se guarda en tu dispositivo: sin cuenta, sin anuncios y sin rastreo.</p></div>
+    </div>
+    <p style="margin-top:28px"><a class="btn dark" href="app/" data-en="Open Lumbrera">Abrir Lumbrera</a></p>
+  </div>
+</section>
+
+<section class="band support" id="apoyar">
+  <div class="wrap">
+    <div>
+      <div class="kicker" style="color:var(--lamp)" data-en="This is the web version">Esta es la versión web</div>
+      <h2 data-en="Help us bring Lumbrera to iPhone and Android">Ayúdanos a llevar Lumbrera a iPhone y Android</h2>
+      <p style="margin-top:18px" data-en="We are building the advanced apps, and they will always be free: no ads and no in-app purchases. They add:">Estamos construyendo las apps avanzadas, y serán <b>siempre gratuitas</b>: sin anuncios y sin compras dentro de la app. Añaden:</p>
+      <ul>
+        <li data-en="Everything offline from day one: scenes, art and maps">Todo sin internet desde el primer día: escenas, arte y mapas</li>
+        <li data-en="3D map tours of each week's places">Recorridos en 3D por los lugares de cada semana</li>
+        <li data-en="Daily reminders, widgets and Siri">Recordatorios diarios, widgets y Siri</li>
+        <li data-en="Explanations of words and passages on the phone itself">Explicaciones de palabras y pasajes en el propio teléfono</li>
+      </ul>
+      <a class="btn primary" href="https://github.com/moy418/biblia/issues/new?title=Quiero%20apoyar%20a%20Lumbrera" data-en="I want to help">Quiero apoyar</a>
+      <p style="margin-top:16px;font-size:15px" data-en="Are you part of a church or ministry? Write to us: a nonprofit can publish the apps without the Apple fee.">¿Eres parte de una iglesia o ministerio? Escríbenos: una organización sin fines de lucro puede publicar las apps sin pagar la cuota de Apple.</p>
+    </div>
+    <div class="costs" aria-label="Costos">
+      <div><span data-en="Apple App Store">App Store de Apple</span><b data-en="$99 / year">$99 al año</b></div>
+      <div><span>Google Play</span><b data-en="$25 once">$25 una vez</b></div>
+      <div><span data-en="Development time">Tiempo de desarrollo</span><b data-en="donations">donaciones</b></div>
+      <div><span data-en="Price for readers">Precio para quien lee</span><b data-en="$0, always">$0, siempre</b></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div><b style="color:#fff;font-family:Literata,serif;font-size:18px">Lumbrera</b><br><span data-en="Bible text: Reina-Valera 1909 (English: Berean Standard Bible), public domain.">Texto bíblico: Reina-Valera 1909 (inglés: Berean Standard Bible), dominio público.</span></div>
+    <div><span data-en="Art: Wikimedia Commons · Films: Internet Archive · Maps: Esri · Articles: Wikipedia">Arte: Wikimedia Commons · Películas: Internet Archive · Mapas: Esri · Artículos: Wikipedia</span><br><a href="https://github.com/moy418/biblia" data-en="Source code on GitHub">Código en GitHub</a></div>
+  </div>
+</footer>
+
+<script>
+{
+  const eras=[["Creación y caída","Creation and fall",1,1,"#6d4c9f"],["Patriarcas","Patriarchs",2,4,"#a86114"],["Éxodo y desierto","Exodus and wilderness",5,11,"#c0392b"],["Conquista y jueces","Conquest and judges",12,14,"#7d8b2f"],["Reino unido","United kingdom",15,26,"#1f3a8a"],["Reino dividido","Divided kingdom",27,37,"#3b5bb5"],["Exilio y regreso","Exile and return",38,42,"#5c6670"],["Jesús","Jesus",43,46,"#b8860b"],["La iglesia","The church",47,52,"#0d7379"]];
+  let en=false;try{en=localStorage.getItem('lumbrera.landing')==='en'||(!localStorage.getItem('lumbrera.landing')&&!navigator.language.toLowerCase().startsWith('es'))}catch(e){}
+  const draw=()=>{
+    document.getElementById('track').innerHTML=eras.map(e=>`<div style="flex:${e[3]-e[2]+1};background:${e[4]}" title="${en?e[1]:e[0]}">${en?e[1]:e[0]}</div>`).join('');
+    document.getElementById('legend').innerHTML=eras.map(e=>`<div><i style="background:${e[4]}"></i>${en?e[1]:e[0]} · ${en?'weeks':'semanas'} ${e[2]}${e[3]>e[2]?'–'+e[3]:''}</div>`).join('');
+  };
+  const els=[...document.querySelectorAll('[data-en],[data-en-html]')];
+  els.forEach(el=>{el.dataset.es=el.innerHTML});
+  const apply=()=>{
+    els.forEach(el=>{el.innerHTML=en?(el.dataset.enHtml||el.dataset.en.replace(/&/g,'&amp;').replace(/</g,'&lt;')):el.dataset.es});
+    document.documentElement.lang=en?'en':'es';document.getElementById('lang').textContent=en?'ES':'EN';draw();
+  };
+  document.getElementById('lang').onclick=()=>{en=!en;try{localStorage.setItem('lumbrera.landing',en?'en':'es')}catch(e){};apply()};
+  apply();
+}
+</script>
 </body>
 </html>

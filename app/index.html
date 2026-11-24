@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lumbrera — Biblia Reina-Valera 1909</title>
+<meta name="description" content="La Biblia Reina-Valera 1909 en 52 semanas, en orden cronológico, con mapas, familias, línea del tiempo, dioses falsos, arte y cine.">
+<meta name="theme-color" content="#1f3a8a" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Lumbrera">
+<link rel="apple-touch-icon" href="img/icon-180.png">
+<link rel="icon" href="img/icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="vendor/leaflet.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div id="app">
+  <header id="topbar"><button id="back" class="icon-btn" aria-label="Atrás" hidden>‹</button><h1 id="title">Lumbrera</h1><button id="langBtn" class="pill" aria-label="Idioma">EN</button></header>
+  <main id="view" tabindex="-1"></main>
+  <nav id="tabs" aria-label="Secciones"></nav>
+</div>
+<div id="sheet" class="sheet" hidden><div class="sheet-backdrop"></div><div class="sheet-panel" role="dialog" aria-modal="true"><div class="sheet-grab"></div><button class="sheet-close icon-btn" aria-label="Cerrar">✕</button><div class="sheet-body"></div></div></div>
+<div id="zoom" class="zoom" hidden><img alt=""><button class="zoom-close icon-btn" aria-label="Cerrar">✕</button><div class="zoom-cap"></div></div>
+<script src="vendor/leaflet.js" defer></script>
+<script src="app.js" defer></script>
+</body>
+</html>

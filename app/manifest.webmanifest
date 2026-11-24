@@ -1,0 +1,29 @@
+{
+  "name": "Lumbrera — Biblia Reina-Valera 1909",
+  "short_name": "Lumbrera",
+  "description": "La Biblia Reina-Valera 1909 en 52 semanas, en orden cronológico, con una lectura que se puede ver.",
+  "start_url": "./#/hoy",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f2f2f7",
+  "theme_color": "#1f3a8a",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
