@@ -6,7 +6,7 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem('biblia.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem('biblia.' + k, JSON.stringify(v)); } catch {} }
 };
-let LANG = store.get('lang', (navigator.language || 'es').toLowerCase().startsWith('es') ? 'es' : 'en');
+let LANG = store.get('lang', 'en');
 let C = null;                      // contenido del idioma actual
 const bibleCache = {};             // `${lang}/${book}` -> capítulos
 const P = {                        // progreso
@@ -317,7 +317,9 @@ async function viewReader(el, parts) {
   const texts = await Promise.all(refs.map(([b, c]) => chapter(b, c)));
   const gl = C.glossary.map(g => g.term).filter(t => t.length > 2).sort((a, b) => b.length - a.length);
   const glRe = gl.length ? new RegExp(`(^|[^\\p{L}])(${gl.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})(?=[^\\p{L}]|$)`, 'giu') : null;
-  const verseHTML = (t) => { let s = esc(t); if (glRe) s = s.replace(glRe, (m, a, term) => `${a}<span class="gl" data-gl="${esc(term.toLowerCase())}">${term}</span>`); return s; };
+  // Subraya cada palabra del glosario solo la primera vez que aparece en el capítulo, para no saturar el texto.
+  let seen = new Set();
+  const verseHTML = (t) => { let s = esc(t); if (glRe) s = s.replace(glRe, (m, a, term) => { const k = term.toLowerCase(); if (seen.has(k)) return m; seen.add(k); return `${a}<span class="gl" data-gl="${esc(k)}">${term}</span>`; }); return s; };
   let html = `<div class="reader">`;
   refs.forEach(([b, c], i) => {
     html += `<h2>${esc(bookName(b))} ${c}</h2>`;
@@ -327,6 +329,7 @@ async function viewReader(el, parts) {
     }
     const arts = artIn(b, c), sc = scenesIn(b, c);
     if (arts.length || sc.length) html += `<div class="strip">${arts.map(a => `<button data-art="${a.id}"><img loading="lazy" src="${esc(artImg(a))}" alt=""><span><div class="t">${esc(a.title)}</div><div class="s">${esc(a.artist)}</div></span></button>`).join('')}${sc.map(s => `<button data-scene="${s.frag.id}"><img loading="lazy" src="${sceneThumb(s.frag.id)}" alt=""><span><div class="t">▶ ${esc(s.frag.title)}</div><div class="s">${esc(s.film.title)} (${s.film.year})</div></span></button>`).join('')}</div>`;
+    seen = new Set();
     html += '<p>' + texts[i].map((t, v) => `<span class="v ${P.marks[`${b}-${c}-${v + 1}`] ? 'sel' : ''}" data-v="${b}-${c}-${v + 1}"><sup>${v + 1}</sup>${verseHTML(t)}</span> `).join('') + '</p>';
   });
   html += `</div><p class="small muted">${esc(C.bibleName)} · ${L('dominio público', 'public domain')}</p>`;
